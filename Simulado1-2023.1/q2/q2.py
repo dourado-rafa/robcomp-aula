@@ -19,19 +19,14 @@ print("Diretório de trabalho: ", os.getcwd())
 # Arquivos necessários
 video = "triangulos.mp4"
 
-def mira(img, ponto, tamanho=3, cor=(0,0,255)):
-    x, y = int(ponto[0]), int(ponto[1])
-
-    cv2.line(img,(x - tamanho,y),(x + tamanho,y),cor,2)
-    cv2.line(img,(x,y - tamanho),(x, y + tamanho),cor,2)
-
 def dentro_fora_triangulo(frame):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-    mask_triangulo = cv2.inRange(hsv, (36, 50, 50), (89, 255, 255))
+    mask_triangulo = cv2.inRange(hsv, (0, 50, 50), (9, 255, 255))
     triangulo = np.where(mask_triangulo==255)
-    x_min, y_min, x_max, y_max = min(triangulo[1]), min(triangulo[0]), max(triangulo[1]), max(triangulo[0])
-    a, b, c = (triangulo[1][int(np.argmin(triangulo[0]))], y_min), (x_min, y_max), (x_max, y_max)
+    y_lista, x_lista = triangulo
+    x_min, y_min, x_max, y_max = min(x_lista), min(y_lista), max(x_lista), max(y_lista)
+    a, b, c = (x_lista[int(np.argmin(y_lista))], y_min), (x_min, y_max), (x_max, y_max)
 
     mask_estrela = cv2.inRange(hsv, (90, 50, 50), (128, 255, 255))
     contornos_azuis, arvore = cv2.findContours(mask_estrela, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)

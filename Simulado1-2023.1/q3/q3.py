@@ -16,16 +16,6 @@ print("Diretório de trabalho: ", os.getcwd())
 # Arquivos necessários
 video = "dogtraining.mp4"
 
-def desenha_circulos(img, circulos, cor=(0,0,255)):
-
-    if circulos is not None:
-        saida = img.copy()
-        for circulo in circulos[0]:
-            x, y, raio = circulo
-            cv2.circle(saida, (int(x), int(y)), int(raio), cor, thickness=-1)
-
-    return saida
-
 CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
     "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
     "dog", "horse", "motorbike", "person", "pottedplant", "sheep",
