@@ -11,29 +11,29 @@ def desenha(img, forma, inicio, fim, tamanho=3, cor=(0,0,255)):
 def mira(img, ponto, tamanho=3, cor=(0,0,255)):
 
     x, y = int(ponto[0]), int(ponto[1])
-    cv2.line(img,(x - tamanho,y),(x + tamanho,y),cor,2)
-    cv2.line(img,(x,y - tamanho),(x, y + tamanho),cor,2)
+    cv2.line(img, (x - tamanho, y), (x + tamanho, y), cor, tamanho)
+    cv2.line(img, (x, y - tamanho), (x, y + tamanho), cor, tamanho)
     
-def desenha_circulos(img, circulos, cor=(0,0,255)):
+def desenha_circulos(img, circulos, tamanho=-1, cor=(0,0,255)):
 
     if circulos is not None:
         for circulo in circulos[0]:
             x, y, raio = circulo
-            cv2.circle(img, (int(x), int(y)), int(raio), cor, thickness=-1)
+            cv2.circle(img, (int(x), int(y)), int(raio), cor, tamanho)
 
 
 # ========== [ Processamento de Imagem ] ========== #
 
-CORES_HSV = {'black' : ((180, 255, 30), (0, 0, 0)),
-              'white' : ((180, 18, 255), (0, 0, 255)),
-              'red1'  : ((180, 255, 255), (159, 50, 50)),
-              'red2'  : ((9, 255, 255), (0, 50, 50)),
-              'green' : ((36, 50, 50), (89, 255, 255)),
-              'blue'  : ((90, 50, 50), (128, 255, 255)),
-              'yellow': ((35, 255, 255), (25, 50, 50)),
-              'purple': ((158, 255, 255), (129, 50, 50)),
-              'orange': ((24, 255, 255), (10, 50, 50)),
-              'gray'  : ((180, 18, 230), (0, 0, 50))}
+CORES_HSV = {'black' : ((0, 0, 0), (180, 255, 30)),
+             'white' : ((0, 0, 230), (180, 18, 255)),
+             'gray'  : ((0, 0, 40), (180, 18, 230)),
+
+             'red'   : ((159, 50, 50), (180, 255, 255)),
+             'green' : ((36, 50, 50), (89, 255, 255)),
+             'blue'  : ((90, 50, 50), (128, 255, 255)),
+             'yellow': ((25, 50, 50), (35, 255, 255)),
+             'purple': ((129, 50, 50), (158, 255, 255)),
+             'orange': ((10, 50, 50), (24, 255, 255))}
 
 def segmentador(img, min, max):
 
@@ -55,9 +55,7 @@ def encontrar_contornos(img, tipo=cv2.RETR_EXTERNAL, maior=False, min=1):
 
 def encontrar_centro(contorno, img=None):
 
-    x = int(contorno[:,:,0].mean())
-    y = int(contorno[:,:,1].mean())
-    centro = (x,y)
+    centro = (int(contorno[:,:,0].mean()), int(contorno[:,:,1].mean()))
 
     if img is not None:
         saida = img.copy()
@@ -81,18 +79,18 @@ def encontrar_retangulo(contorno, img=None):
 
 #  ========== [ Reconhecimento de Imagens com MobileNet] ========== #
 
-CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
+CLASSES_MOBILENET = ["background", "aeroplane", "bicycle", "bird", "boat",
     "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
     "dog", "horse", "motorbike", "person", "pottedplant", "sheep",
     "sofa", "train", "tvmonitor"]
-CORES = np.random.uniform(0, 255, size=(len(CLASSES), 3))
+CORES_MOBILENET = np.random.uniform(0, 255, size=(len(CLASSES_MOBILENET), 3))
 
 def inicia_net(diretorio="./"):
     print('[INFO] loading model...')
     mobilenet = cv2.dnn.readNetFromCaffe(f'{diretorio}MobileNetSSD_deploy.prototxt.txt', f'{diretorio}MobileNetSSD_deploy.caffemodel')
     return mobilenet
 
-def detecta(mobilenet, frame, CONFIANCA=70, CORES=CORES, CLASSES=CLASSES):
+def detecta(mobilenet, frame, CONFIANCA=70, CORES=CORES_MOBILENET, CLASSES=CLASSES_MOBILENET):
 
     img = frame.copy()
     l, a = img.shape[:2] # Tamanho da imagem completa
@@ -109,7 +107,7 @@ def detecta(mobilenet, frame, CONFIANCA=70, CORES=CORES, CLASSES=CLASSES):
         confianca = deteccoes[0, 0, i, 2]*100 # Confianca associada a predicao
 
         # Processando predicoes com confiança maior que o minimo estabelicido
-        if confianca > CONFIANCA:
+        if confianca >= CONFIANCA:
             index = int(deteccoes[0, 0, i, 1]) # Indice da predicao
             cor, classe = CORES[index], CLASSES[index] # Cor e Classe referentes ao indece da predicao
 
